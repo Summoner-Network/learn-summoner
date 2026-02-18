@@ -15,6 +15,13 @@ client_flow = client.flow().activate()
 client_flow.add_arrow_style(stem="-", brackets=("[", "]"), separator=",", tip=">")
 Trigger = client_flow.triggers()
 
+state="register"
+
+@client.upload_states()
+async def upload_states(_: Any) -> list[Node]:
+    viz.push_states([state])
+    return state
+
 @client.receive(route="register")
 async def on_register(msg: Any) -> Event: 
     client.logger.info(msg)
