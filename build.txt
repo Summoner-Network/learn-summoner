@@ -1,7 +1,10 @@
 # Modules building on the top of the core SDK
-https://github.com/Summoner-Network/extension-agentclass.git
-# aurora
+https://github.com/Summoner-Network/extension-agentclass.git:
+aurora
 
 # Utility modules such as state visualization, agent tools, and related helpers
-# https://github.com/Summoner-Network/extension-utilities.git:
-# visionary
+https://github.com/Summoner-Network/extension-utilities.git:
+visionary
+curl_tools
+gpt_guardrails
+crypto_utils
