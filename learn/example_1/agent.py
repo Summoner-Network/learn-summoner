@@ -6,7 +6,7 @@ from summoner.protocol import Node, Move, Stay, Test, Event
 from summoner.visionary import ClientFlowVisualizer
 
 
-AGENT_ID = "VisionaryTestAgent"
+AGENT_ID = "ExampleAgent_1"
 viz = ClientFlowVisualizer(title=f"{AGENT_ID} Graph", port=8710)
 
 client = SummonerClient(name=AGENT_ID)
@@ -45,6 +45,6 @@ if __name__ == "__main__":
     viz.attach_logger(client.logger)
     viz.start(open_browser=True)
     viz.set_graph_from_dna(json.loads(client.dna()), parse_route=client_flow.parse_route)
-    viz.push_states([Node("A")])
+    viz.push_states(["register"])
 
-    client.run(host = "127.0.0.1", port = 8888, config_path=args.config_path or "configs/client_config.json")
+    client.run(host = "www.summoner.network", port = 8888, config_path=args.config_path or "configs/client_config.json")
