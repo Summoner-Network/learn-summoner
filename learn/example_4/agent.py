@@ -1,12 +1,12 @@
-import argparse, json
-from typing import Any
+import argparse, json, asyncio
+from typing import Any, Optional
 
 from summoner.client import SummonerClient
-from summoner.protocol import Test, Event
+from summoner.protocol import Test, Event, Direction
 from summoner.visionary import ClientFlowVisualizer
 
 
-AGENT_ID = "ChangeMe_Agent_2"
+AGENT_ID = "ChangeMe_Agent_4"
 viz = ClientFlowVisualizer(title=f"{AGENT_ID} Graph", port=8710)
 
 client = SummonerClient(name=AGENT_ID)
@@ -42,6 +42,19 @@ async def on_ban(msg: Any) -> Event:
     client.logger.info(msg)
     return Test(Trigger.ok)
 
+@client.send(route="clock")
+async def send_on_clock() -> str: 
+    viz.push_states(["clock"])
+    await asyncio.sleep(3)
+    return "hello"
+
+@client.hook(direction=Direction.SEND)
+async def sign(msg: Any) -> Optional[dict]:
+    client.logger.info(f"[hook:send] sign {AGENT_ID}")
+    if isinstance(msg, str): msg = {"message": msg}
+    if not isinstance(msg, dict): return
+    msg.update({"from": AGENT_ID})
+    return msg
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run a Summoner client with a specified config.")

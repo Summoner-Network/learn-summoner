@@ -2,11 +2,11 @@ import argparse, json
 from typing import Any
 
 from summoner.client import SummonerClient
-from summoner.protocol import Node, Move, Stay, Test, Event
+from summoner.protocol import Test, Event
 from summoner.visionary import ClientFlowVisualizer
 
 
-AGENT_ID = "ExampleAgent_1"
+AGENT_ID = "ChangeMe_Agent_1"
 viz = ClientFlowVisualizer(title=f"{AGENT_ID} Graph", port=8710)
 
 client = SummonerClient(name=AGENT_ID)
@@ -21,17 +21,17 @@ async def on_register(msg: Any) -> Event:
     return Test(Trigger.ok)
 
 @client.receive(route="contact")
-async def on_register(msg: Any) -> Event: 
+async def on_contact(msg: Any) -> Event: 
     client.logger.info(msg)
     return Test(Trigger.ok)
 
 @client.receive(route="friend")
-async def on_register(msg: Any) -> Event: 
+async def on_friend(msg: Any) -> Event: 
     client.logger.info(msg)
     return Test(Trigger.ok)
 
 @client.receive(route="ban")
-async def on_register(msg: Any) -> Event: 
+async def on_ban(msg: Any) -> Event: 
     client.logger.info(msg)
     return Test(Trigger.ok)
 
@@ -47,4 +47,4 @@ if __name__ == "__main__":
     viz.set_graph_from_dna(json.loads(client.dna()), parse_route=client_flow.parse_route)
     viz.push_states(["register"])
 
-    client.run(host = "www.summoner.network", port = 8888, config_path=args.config_path or "configs/client_config.json")
+    client.run(host = "__server__", port = 8888, config_path=args.config_path or "configs/client_config.json")

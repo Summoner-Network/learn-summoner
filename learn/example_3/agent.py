@@ -1,11 +1,12 @@
-import argparse, json
+import argparse, json, asyncio
 from typing import Any
 
 from summoner.client import SummonerClient
+from summoner.protocol import Test, Event
 from summoner.visionary import ClientFlowVisualizer
 
 
-AGENT_ID = "TemplateAgent"
+AGENT_ID = "ChangeMe_Agent_3"
 viz = ClientFlowVisualizer(title=f"{AGENT_ID} Graph", port=8710)
 
 client = SummonerClient(name=AGENT_ID)
@@ -14,7 +15,38 @@ client_flow = client.flow().activate()
 client_flow.add_arrow_style(stem="-", brackets=("[", "]"), separator=",", tip=">")
 Trigger = client_flow.triggers()
 
-...
+state="register"
+
+@client.upload_states()
+async def upload_states(_: Any) -> list[str]:
+    viz.push_states([state])
+    return state
+
+@client.receive(route="register")
+async def on_register(msg: Any) -> Event: 
+    client.logger.info(msg)
+    return Test(Trigger.ok)
+
+@client.receive(route="contact")
+async def on_contact(msg: Any) -> Event: 
+    client.logger.info(msg)
+    return Test(Trigger.ok)
+
+@client.receive(route="friend")
+async def on_friend(msg: Any) -> Event: 
+    client.logger.info(msg)
+    return Test(Trigger.ok)
+
+@client.receive(route="ban")
+async def on_ban(msg: Any) -> Event: 
+    client.logger.info(msg)
+    return Test(Trigger.ok)
+
+@client.send(route="clock")
+async def send_on_clock() -> str: 
+    viz.push_states(["clock"])
+    await asyncio.sleep(3)
+    return "hello"
 
 
 if __name__ == "__main__":
