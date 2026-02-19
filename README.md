@@ -2,6 +2,11 @@
 
 ## Installation
 
+```
+git clone https://github.com/Summoner-Network/learn-summoner.git
+cd learn-summoner
+```
+
 ### POSIX (Bash)
 
 First installation:
@@ -39,6 +44,8 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 ### Template
 
+You should see an empty graph being displayed:
+
 ```
-python learn/
+python learn/template/agent.py
 ```
