@@ -25,7 +25,6 @@ async def validate(msg: Any) -> Optional[dict]:
     if not (isinstance(msg, dict) and "remote_addr" in msg and "content" in msg): return
     address: str = msg["remote_addr"]
     content: Any = msg["content"]
-    print(content)
     if not isinstance(content, dict): return
     if content.get("to", "") not in [None, AGENT_ID]: return
     if "from" not in content:
@@ -48,7 +47,7 @@ async def check_sender(content: dict) -> Optional[dict]:
 
 
 @client.upload_states()
-async def upload_states(msg: Any) -> list[str]:
+async def upload_states(msg: Any) -> Any:
     global relations
     sender_id = msg.get("from")
     if not sender_id: return
@@ -59,17 +58,17 @@ async def upload_states(msg: Any) -> list[str]:
 
 
 @client.receive(route="register --> contact")
-async def on_register(msg: Any) -> Event: 
+async def on_register(msg: Any) -> Optional[Event]: 
     if msg["message"] == "Hello": 
         return Move(Trigger.ok)
 
 @client.receive(route="register --> ban")
-async def on_register(msg: Any) -> Event: 
+async def on_register(msg: Any) -> Optional[Event]: 
     if msg["message"] == "I don't like you": 
         return Move(Trigger.ok)
 
 @client.receive(route="contact --> friend")
-async def on_register(msg: Any) -> Event: 
+async def on_register(msg: Any) -> Optional[Event]: 
     if msg["message"] == "I like you": 
         return Move(Trigger.ok)
 
@@ -131,4 +130,4 @@ if __name__ == "__main__":
     viz.set_graph_from_dna(json.loads(client.dna()), parse_route=client_flow.parse_route)
     viz.push_states(["register"])
 
-    client.run(host = "__server__", port = 8888, config_path=args.config_path or "configs/client_config.json")
+    client.run(host = "187.77.102.80", port = 8888, config_path=args.config_path or "configs/client_config.json")

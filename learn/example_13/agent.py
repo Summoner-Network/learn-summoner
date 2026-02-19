@@ -9,9 +9,10 @@ state_lock = asyncio.Lock()
 
 relations = {}
 outside_view = {}
+listening = True
 
 import random
-AGENT_ID = f"ChangeMe_Agent_12_{random.randint(0,1000)}"
+AGENT_ID = f"ChangeMe_Agent_13_{random.randint(0,1000)}"
 viz = ClientFlowVisualizer(title=f"{AGENT_ID} Graph", port=random.randint(7777,8887))
 
 client = SummonerClient(name=AGENT_ID)
@@ -26,6 +27,9 @@ async def validate(msg: Any) -> Optional[dict]:
     if not (isinstance(msg, dict) and "remote_addr" in msg and "content" in msg): return
     address: str = msg["remote_addr"]
     content: Any = msg["content"]
+    if content == "/travel" and listening:
+        client.logger.info(f"[hook:recv] /travel instruction received")
+        return content
     if not isinstance(content, dict): return
     if content.get("to", "") not in [None, AGENT_ID]: return
     if "from" not in content:
@@ -35,7 +39,10 @@ async def validate(msg: Any) -> Optional[dict]:
 
 @client.hook(direction=Direction.RECEIVE, priority=1)
 async def check_sender(content: dict) -> Optional[dict]:
-    if  any(s == content.get("from","")[:len(s)] for s in [
+    if content == "/travel" and listening:
+        client.logger.info(f"[hook:recv] /travel instruction received")
+        return content
+    elif  any(s == content.get("from","")[:len(s)] for s in [
                                 "ChangeMe_Agent_6",
                                 "ChangeMe_Agent_7",
                                 "ChangeMe_Agent_8",
@@ -43,6 +50,7 @@ async def check_sender(content: dict) -> Optional[dict]:
                                 "ChangeMe_Agent_10",
                                 "ChangeMe_Agent_11",
                                 "ChangeMe_Agent_12",
+                                "ChangeMe_Agent_13",
                             ]): 
         return content
     else:
@@ -52,6 +60,10 @@ async def check_sender(content: dict) -> Optional[dict]:
 @client.upload_states()
 async def upload_states(msg: Any) -> Any:
     global relations, outside_view
+    print(msg)
+    if listening:
+        viz.push_states(["listen"])
+        return "listen"
     sender_id = msg.get("from")
     if not sender_id: return
     async with state_lock:
@@ -62,6 +74,16 @@ async def upload_states(msg: Any) -> Any:
     async with state_lock:
         viz.push_states(view_states)
     return { f"to_me:{sender_id}": relations[sender_id], f"to_them:{sender_id}": outside_view[sender_id] }
+
+@client.receive(route="listen --> register")
+async def on_register(msg: Any) -> Optional[Event]: 
+    global listening
+    print("listening!")
+    if listening and msg ==  "/travel":
+        await client.travel_to(host="187.77.102.80", port=8888)
+        async with state_lock:
+            listening = False
+        return Move(Trigger.ok)
 
 contact_list = []
 @client.receive(route="register --> contact")
@@ -119,6 +141,10 @@ async def on_register(msg: Any) -> Optional[Event]:
 
 @client.download_states()
 async def download_states(possible_states: dict[str, list[Node]]) -> None:
+    if listening:
+        viz.push_states(["listen"])
+        return
+    if isinstance(possible_states, list): possible_states = {"default": possible_states}
     global relations, outside_view
     for sender_id_, sender_states in possible_states.items():
         if sender_id_.startswith("to_me:"):
@@ -161,14 +187,21 @@ async def on_ban(msg: Any) -> Event:
     return Test(Trigger.ok)
 
 @client.send(route="clock")
-async def send_on_clock() -> str:
+async def send_on_clock() -> Optional[str]:
     async with state_lock:
+        if listening:
+            await asyncio.sleep(0.1)
+            return
         viz.push_states(["clock"])
     await asyncio.sleep(3)
     return {"message": "Hello", "to": None}
 
 @client.send(route="reputation", multi=True)
 async def send_on_clock() -> list[str]: 
+    async with state_lock:
+        if listening:
+            await asyncio.sleep(0.1)
+            return []
     await asyncio.sleep(3)
     async with state_lock:
         viz.push_states(["reputation"])
@@ -221,6 +254,6 @@ if __name__ == "__main__":
     viz.attach_logger(client.logger)
     viz.start(open_browser=True)
     viz.set_graph_from_dna(json.loads(client.dna()), parse_route=client_flow.parse_route)
-    viz.push_states(["register"])
+    viz.push_states(["listen"])
 
-    client.run(host = "187.77.102.80", port = 8888, config_path=args.config_path or "configs/client_config.json")
+    client.run(host = "127.0.0.1", port = 8888, config_path=args.config_path or "configs/client_config.json")

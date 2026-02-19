@@ -48,4 +48,4 @@ if __name__ == "__main__":
     parser.add_argument('--config', dest='config_path', required=False, help='The relative path to the config file (JSON) for the client (e.g., --config configs/client_config.json)')
     args, _ = parser.parse_known_args()
 
-    client.run(host="__server__", port=8888, config_path=args.config_path or "configs/client_config.json")
+    client.run(host="127.0.0.1", port=8888, config_path=args.config_path or "configs/client_config.json")

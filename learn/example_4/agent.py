@@ -67,4 +67,4 @@ if __name__ == "__main__":
     viz.set_graph_from_dna(json.loads(client.dna()), parse_route=client_flow.parse_route)
     viz.push_states(["register"])
 
-    client.run(host = "__server__", port = 8888, config_path=args.config_path or "configs/client_config.json")
+    client.run(host = "187.77.102.80", port = 8888, config_path=args.config_path or "configs/client_config.json")
