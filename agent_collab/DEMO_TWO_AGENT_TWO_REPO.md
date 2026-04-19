@@ -37,8 +37,8 @@ Side: host shell
 
 ```bash
 mkdir -p ~/demo/task-service-api ~/demo/task-portal-web
-cd ~/demo/task-service-api && git init
-cd ~/demo/task-portal-web && git init
+cd ~/demo/task-service-api
+cd ~/demo/task-portal-web
 ```
 
 Installation in both repos:
